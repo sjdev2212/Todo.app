@@ -8,7 +8,7 @@ In this project I created a Single Page Todo Application using react.
 
 
 # Screenshot
-![screenshot](/img/31.png)
+![screenshot](/react-todo-app/img/31.png)
 
 
 
