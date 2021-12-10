@@ -1,63 +1,95 @@
-import React from "react"
-import TodosList from "./TodosList";
+import React, { useState, useEffect } from "react"
+import { Route, Routes } from "react-router-dom"
 import Header from "./Header"
 import InputTodo from "./InputTodo"
-import { v4 as uuidv4 } from "uuid";
+import TodosList from "./TodosList"
+import About from "../pages/About"
+import NotMatch from "../pages/NoMatch"
+import Navbar from "./Navbar"
+import { v4 as uuidv4 } from "uuid"
 
+const TodoContainer = () => {
+  const [todos, setTodos] = useState(getInitialTodos())
 
-
-class TodoContainer extends React.Component {
-    state = {
-        todos: []
-     
-       };
-       handleChange = id => {
-        this.setState(prevState => ({
-          todos: prevState.todos.map(todo => {
-            if (todo.id === id) {
-              return {
-                ...todo,
-                completed: !todo.completed,
-              }
-            }
-            return todo
-          }),
-        }))
-      };
-      delTodo = id => {
-        this.setState({
-          todos: [
-            ...this.state.todos.filter(todo => {
-              return todo.id !== id;
-            })
-          ]
-        });
-      };
-      addTodoItem = title => {
-        const newTodo = {
-          id: uuidv4(),
-          title: title,
-          completed: false
-        };
-        this.setState({
-          todos: [...this.state.todos, newTodo]
-        });
-      };
-      render() {
-        return (
-          <div className="container">
-            <div className="inner">
-              <Header />
-              <InputTodo addTodoProps={this.addTodoItem} />
-              <TodosList
-                todos={this.state.todos}
-                handleChangeProps={this.handleChange}
-                deleteTodoProps={this.delTodo}
-              />
-            </div>
-          </div>
-        );
-      }
+  const handleChange = id => {
+    setTodos(prevState =>
+      prevState.map(todo => {
+        if (todo.id === id) {
+          return {
+            ...todo,
+            completed: !todo.completed,
+          }
+        }
+        return todo
+      })
+    )
   }
+
+  const delTodo = id => {
+    setTodos([
+      ...todos.filter(todo => {
+        return todo.id !== id
+      }),
+    ])
+  }
+
+  const addTodoItem = title => {
+    const newTodo = {
+      id: uuidv4(),
+      title: title,
+      completed: false,
+    }
+    setTodos([...todos, newTodo])
+  }
+
+  const setUpdate = (updatedTitle, id) => {
+    setTodos(
+      todos.map(todo => {
+        if (todo.id === id) {
+          todo.title = updatedTitle
+        }
+        return todo
+      })
+    )
+  }
+
+  function getInitialTodos() {
+    // getting stored items
+    const temp = localStorage.getItem("todos")
+    const savedTodos = JSON.parse(temp)
+    return savedTodos || []
+  }
+  useEffect(() => {
+    // storing todos items
+    const temp = JSON.stringify(todos)
+    localStorage.setItem("todos", temp)
+  }, [todos])
+  return (
+    <>
+    <Navbar />
+    <div className="container">
+      <div className="inner">
+        <Header />
+        <InputTodo addTodoProps={addTodoItem} />
+        <TodosList
+          todos={todos}
+          handleChangeProps={handleChange}
+          deleteTodoProps={delTodo}
+          setUpdate={setUpdate}
+        />
+      </div>
+    </div>
+    <Routes>
+       <Route exact path="/"/>
+
+     
+      <Route exact path="/about" element={<About />} />
+      <Route exact path="/*" element={<NotMatch />} />
+     
+    
+    </Routes>
+    </>
+  )
+}
 
 export default TodoContainer
